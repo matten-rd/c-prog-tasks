@@ -19,7 +19,7 @@ int is_valid_hex(char *ch)
     return 0;
 }
 
-void handle_valid_input(int type, int humidity, int temperature, TemperatureAndHumidity *thStore)
+void handle_valid_input(int type, int humidity, int temperature, TemperatureAndHumidityStore *thStore)
 {
     // Handles all possible types
     switch (type)
@@ -101,7 +101,7 @@ int main(int argc, char const *argv[])
 
     int message, type, humidity, temperature;
 
-    TemperatureAndHumidity temperatureAndHumidityStore = TemperatureAndHumidity_init();
+    TemperatureAndHumidityStore temperatureAndHumidityStore = TemperatureAndHumidity_init();
 
     while (1)
     {

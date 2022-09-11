@@ -1,7 +1,7 @@
 #ifndef TEMPERATUREANDHUMIDITY_H
 #define TEMPERATUREANDHUMIDITY_H
 
-typedef struct TemperatureAndHumidity
+typedef struct TemperatureAndHumidityStore
 {
     int currentLogIndex;
     unsigned maxTemperature;
@@ -12,11 +12,11 @@ typedef struct TemperatureAndHumidity
     unsigned minHumidity;
     float avgHumidity;
     unsigned humidityLog[10];
-} TemperatureAndHumidity;
+} TemperatureAndHumidityStore;
 
-TemperatureAndHumidity TemperatureAndHumidity_init();
+TemperatureAndHumidityStore TemperatureAndHumidity_init();
 
-void TemperatureAndHumidity_update(int humidity, int temperature, TemperatureAndHumidity *self);
+void TemperatureAndHumidity_update(int humidity, int temperature, TemperatureAndHumidityStore *self);
 
 int TemperatureAndHumidity_get_type(int message);
 

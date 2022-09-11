@@ -15,13 +15,13 @@ unsigned extract_bits(unsigned value, unsigned start, unsigned end)
     return (value & mask) >> start;     // Perform the bitwise AND and shift the isolated bits to LSB (to only get the isolated bits)
 }
 
-TemperatureAndHumidity TemperatureAndHumidity_init()
+TemperatureAndHumidityStore TemperatureAndHumidity_init()
 {
-    TemperatureAndHumidity th = { .currentLogIndex = 0, .avgTemperature = 0.0, .avgHumidity = 0.0};
+    TemperatureAndHumidityStore th = {.currentLogIndex = 0, .avgTemperature = 0.0, .avgHumidity = 0.0};
     return th;
 }
 
-void TemperatureAndHumidity_update(int humidity, int temperature, TemperatureAndHumidity *self)
+void TemperatureAndHumidity_update(int humidity, int temperature, TemperatureAndHumidityStore *self)
 {
     // Set max temp
     if (self->maxTemperature < temperature || self->currentLogIndex == 0)
