@@ -1,35 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
-typedef struct TemperatureAndHumidityStore
-{
-    int currentLogIndex;
-    unsigned maxTemperature;
-    unsigned minTemperature;
-    float avgTemperature;
-    unsigned temperatureLog[10];
-    unsigned maxHumidity;
-    unsigned minHumidity;
-    float avgHumidity;
-    unsigned humidityLog[10];
-} TemperatureAndHumidityStore;
-
-/**
- * Extract bits between start-end (inclusive) from value.
- * This is achieved by applying an AND mask (bitwise ANDing) - a simple way of extracting a subset of bits.
- * The idea is to create a mask (binary number) that has 1's at the indices we want to keep and 0's at the other indices.
- * This works since any bit X that is ANDed with 1 remain the same (X AND 1 = X) and any bit ANDed with 0 is 0 (X AND 0 = 0).
- */
-unsigned extractBits(unsigned value, unsigned start, unsigned end)
-{
-    unsigned mask;
-    int numberOfBits = end - start + 1; // Number of bits to be extracted/set to 1 in the mask
-    mask = (1 << numberOfBits) - 1;     // Set numberOfBits to 1 e.g. numberOfBits=8 => (1 << 8)-1=11111111 (255)
-    mask <<= start;                     // Shift the 1's to correct position i.e. pad with [start] number of 0's on the right
-    return (value & mask) >> start;     // Perform the bitwise AND and shift the isolated bits to LSB (to only get the isolated bits)
-}
+#include "TemperatureAndHumidity.h"
 
 int is_valid_hex(char *ch)
 {
@@ -46,47 +19,17 @@ int is_valid_hex(char *ch)
     return 0;
 }
 
-void handle_temp_and_humidity_log(int humidity, int temperature, TemperatureAndHumidityStore *tnhStore)
-{
-    // Set max temp
-    if (tnhStore->maxTemperature < temperature || tnhStore->currentLogIndex == 0)
-        tnhStore->maxTemperature = temperature;
-    // Set min temp
-    if (tnhStore->minTemperature > temperature || tnhStore->currentLogIndex == 0)
-        tnhStore->minTemperature = temperature;
-
-    // Set max humidity
-    if (tnhStore->maxHumidity < humidity || tnhStore->currentLogIndex == 0)
-        tnhStore->maxHumidity = humidity;
-    // Set min humidity
-    if (tnhStore->minHumidity > humidity || tnhStore->currentLogIndex == 0)
-        tnhStore->minHumidity = humidity;
-
-    // Calculate avg temp and humidity
-    tnhStore->avgTemperature = tnhStore->avgTemperature + ((temperature - tnhStore->avgTemperature) / (tnhStore->currentLogIndex + 1));
-    tnhStore->avgHumidity = tnhStore->avgHumidity + ((humidity - tnhStore->avgHumidity) / (tnhStore->currentLogIndex + 1));
-
-    // Add received temperature and humidity to log array
-    tnhStore->temperatureLog[tnhStore->currentLogIndex] = temperature;
-    tnhStore->humidityLog[tnhStore->currentLogIndex] = humidity;
-
-    // Increment currentLogIndex
-    tnhStore->currentLogIndex++;
-
-    // Print temperature and humidity
-    printf("Received Temperature: %d\n", temperature);
-    printf("Received Humidity: %d\n", humidity);
-}
-
-void handle_valid_input(int type, int humidity, int temperature, TemperatureAndHumidityStore *tnhStore)
+void handle_valid_input(int type, int humidity, int temperature, TemperatureAndHumidity *thStore)
 {
     // Handles all possible types
     switch (type)
     {
     case 0b000:
-        if (tnhStore->currentLogIndex < 10)
+        if (thStore->currentLogIndex < 10)
         {
-            handle_temp_and_humidity_log(humidity, temperature, tnhStore);
+            TemperatureAndHumidity_update(humidity, temperature, thStore);
+            printf("Received Temperature: %d\n", temperature);
+            printf("Received Humidity: %d\n", humidity);
         }
         else
         {
@@ -95,10 +38,10 @@ void handle_valid_input(int type, int humidity, int temperature, TemperatureAndH
         break;
 
     case 0b010:
-        if (tnhStore->currentLogIndex > 0)
+        if (thStore->currentLogIndex > 0)
         {
-            printf("Average Temperature: %.2f\n", tnhStore->avgTemperature);
-            printf("Average Humidity: %.2f\n", tnhStore->avgHumidity);
+            printf("Average Temperature: %.2f\n", thStore->avgTemperature);
+            printf("Average Humidity: %.2f\n", thStore->avgHumidity);
         }
         else
         {
@@ -108,10 +51,10 @@ void handle_valid_input(int type, int humidity, int temperature, TemperatureAndH
         break;
 
     case 0b011:
-        if (tnhStore->currentLogIndex > 0)
+        if (thStore->currentLogIndex > 0)
         {
-            printf("Minimum Temperature: %d\n", tnhStore->minTemperature);
-            printf("Minimum Humidity: %d\n", tnhStore->minHumidity);
+            printf("Minimum Temperature: %d\n", thStore->minTemperature);
+            printf("Minimum Humidity: %d\n", thStore->minHumidity);
         }
         else
         {
@@ -121,10 +64,10 @@ void handle_valid_input(int type, int humidity, int temperature, TemperatureAndH
         break;
 
     case 0b100:
-        if (tnhStore->currentLogIndex > 0)
+        if (thStore->currentLogIndex > 0)
         {
-            printf("Maximum Temperature: %d\n", tnhStore->maxTemperature);
-            printf("Maximum Humidity: %d\n", tnhStore->maxHumidity);
+            printf("Maximum Temperature: %d\n", thStore->maxTemperature);
+            printf("Maximum Humidity: %d\n", thStore->maxHumidity);
         }
         else
         {
@@ -134,10 +77,10 @@ void handle_valid_input(int type, int humidity, int temperature, TemperatureAndH
         break;
 
     case 0b101:
-        printf("Log: %d entries\n", tnhStore->currentLogIndex);
-        for (int i = 0; i < tnhStore->currentLogIndex; i++)
+        printf("Log: %d entries\n", thStore->currentLogIndex);
+        for (int i = 0; i < thStore->currentLogIndex; i++)
         {
-            printf("Temperature: %d; Humidity: %d\n", tnhStore->temperatureLog[i], tnhStore->humidityLog[i]);
+            printf("Temperature: %d; Humidity: %d\n", thStore->temperatureLog[i], thStore->humidityLog[i]);
         }
         break;
 
@@ -156,18 +99,9 @@ int main(int argc, char const *argv[])
 {
     char logInput[32];
 
-    int hexConvertRes;
-
     int message, type, humidity, temperature;
-    int typeStart = 26, typeEnd = 28;
-    int humidityStart = 13, humidityEnd = 25;
-    int temperatureStart = 0, temperatureEnd = 12;
 
-    TemperatureAndHumidityStore temperatureAndHumidityStore = {
-        .currentLogIndex = 0,
-        .avgTemperature = 0.0,
-        .avgHumidity = 0.0
-    };
+    TemperatureAndHumidity temperatureAndHumidityStore = TemperatureAndHumidity_init();
 
     while (1)
     {
@@ -185,19 +119,13 @@ int main(int argc, char const *argv[])
         }
         else
         {
-            hexConvertRes = sscanf(logInput, "%x", &message);
-            if (hexConvertRes != 1)
-            {
-                printf("Huh?\n");
-            }
-            else
-            {
-                // Here message is a valid hexnumber
-                type = extractBits(message, typeStart, typeEnd);
-                humidity = extractBits(message, humidityStart, humidityEnd);
-                temperature = extractBits(message, temperatureStart, temperatureEnd);
-                handle_valid_input(type, humidity, temperature, &temperatureAndHumidityStore);
-            }
+            sscanf(logInput, "%x", &message);
+
+            // Here message is a valid hexnumber
+            type = TemperatureAndHumidity_get_type(message);
+            humidity = TemperatureAndHumidity_get_humidity(message);
+            temperature = TemperatureAndHumidity_get_temperature(message);
+            handle_valid_input(type, humidity, temperature, &temperatureAndHumidityStore);
         }
     }
     return 0;
