@@ -12,7 +12,7 @@ typedef struct TemperatureStore {
     unsigned tempLog[10];
 } TemperatureStore;
 
-int is_valid_number(char *ch)
+int is_valid_number(char ch[])
 {
     // To catch when input is just 'T'
     int length = strlen(ch);
@@ -114,8 +114,6 @@ int main(int argc, char const *argv[])
     char arr[10];
     char *logInput = arr;
 
-    int sc;
-
     TemperatureStore tempStore = {
         .avgTemp = 0.0,
         .currentLogIndex = 0
@@ -124,14 +122,13 @@ int main(int argc, char const *argv[])
     while (1)
     {
         // read log input
-        sc = scanf("%s", logInput);
-        if (sc != 1) printf("Epic fail");
+        scanf("%s", logInput);
 
         if (strlen(logInput) == 1) // User commands are always 1 char
         {
             handle_user_request(logInput[0], &tempStore);
         }
-        else if (logInput[0] == 'T')
+        else if (logInput[0] == 'T') // Handle possible received temperature
         {
             // Increment pointer past 'T' and check if the rest is a valid number (T20 -> 20)
             logInput++;
