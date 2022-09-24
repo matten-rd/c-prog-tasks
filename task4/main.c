@@ -4,7 +4,7 @@
 
 #include "TemperatureAndHumidity.h"
 
-int is_valid_hex(char *ch)
+int is_valid_hex(char ch[])
 {
     // Handle case when input is empty
     int length = strlen(ch);
@@ -91,7 +91,7 @@ int main(int argc, char const *argv[])
 {
     char logInput[32];
 
-    int message, type, humidity, temperature, newIncrement;
+    int message, reserved, type, humidity, temperature, newIncrement;
 
     TemperatureAndHumidityStore temperatureAndHumidityStore = TemperatureAndHumidity_init();
 
@@ -105,7 +105,7 @@ int main(int argc, char const *argv[])
         // Remove trailing newline to make a proper string
         logInput[strcspn(logInput, "\r\n")] = 0;
 
-        if (!is_valid_hex(&logInput))
+        if (!is_valid_hex(logInput))
         {
             printf("Input Error\n");
         }
@@ -113,35 +113,54 @@ int main(int argc, char const *argv[])
         {
             sscanf(logInput, "%x", &message);
 
-            // Here message is a valid hexnumber
-            type = TemperatureAndHumidity_get_type(message);
-
-            switch (type)
+            reserved = TemperatureAndHumidity_get_reserved(message);
+            if (reserved != 0)
             {
-            case 0b111:
-                newIncrement = TemperatureAndHumidity_get_log_increment(message);
-                TemperatureAndHumidity_set_log_increment(newIncrement, &temperatureAndHumidityStore);
-                printf("New Log Increment: %d\n", newIncrement);
-                printf("Current Log Size: %d\n", temperatureAndHumidityStore.logSize);
-                break;
+                printf("Input Error\n");
+            } else
+            {
+                // Here message is a valid hexnumber
+                type = TemperatureAndHumidity_get_type(message);
 
-            case 0b110:
-                printf("Exiting...\n");
-                exit(0);
-                break;
+                switch (type)
+                {
+                case 0b111:
+                    newIncrement = TemperatureAndHumidity_get_log_increment(message);
+                    if (newIncrement <= 0)
+                    {
+                        printf("Input Error\n");
+                    }
+                    else
+                    {
+                        TemperatureAndHumidity_set_log_increment(newIncrement, &temperatureAndHumidityStore);
+                        printf("New Log Increment: %d\n", newIncrement);
+                        printf("Current Log Size: %d\n", temperatureAndHumidityStore.logSize);
+                    }
+                    break;
 
-            default:
-                if (temperatureAndHumidityStore.logSize == 0)
-                {
-                    printf("Log Not Initialized\n");
+                case 0b110:
+                    printf("Exiting...\n");
+                    // free-ing causes RTE in Kattis
+                    // if (temperatureAndHumidityStore.temperatureLog != NULL)
+                    //     free(temperatureAndHumidityStore.temperatureLog);
+                    // if (temperatureAndHumidityStore.humidityLog != NULL)
+                    //     free(temperatureAndHumidityStore.humidityLog);
+                    exit(0);
+                    break;
+
+                default:
+                    if (temperatureAndHumidityStore.logSize == 0)
+                    {
+                        printf("Log Not Initialized\n");
+                    }
+                    else
+                    {
+                        humidity = TemperatureAndHumidity_get_humidity(message);
+                        temperature = TemperatureAndHumidity_get_temperature(message);
+                        handle_valid_input(type, humidity, temperature, &temperatureAndHumidityStore);
+                    }
+                    break;
                 }
-                else 
-                {
-                    humidity = TemperatureAndHumidity_get_humidity(message);
-                    temperature = TemperatureAndHumidity_get_temperature(message);
-                    handle_valid_input(type, humidity, temperature, &temperatureAndHumidityStore);
-                }
-                break;
             }
             
         }

@@ -33,27 +33,18 @@ int TemperatureAndHumidity_get_log_increment(int message)
 void TemperatureAndHumidity_set_log_increment(int newIncrement, TemperatureAndHumidityStore *self)
 {
     self->logIncrement = newIncrement;
-    TemperatureAndHumidity_update_log_size(self);
+    if (self->logSize == 0)
+    {
+        TemperatureAndHumidity_update_log_size(self);
+    }
 }
 
 void TemperatureAndHumidity_update_log_size(TemperatureAndHumidityStore *self)
 {
-    if (self->temperatureLog == NULL)
-    {
-        self->temperatureLog = malloc(self->logIncrement * sizeof(int));
-    }
-    else
-    {
-        self->temperatureLog = realloc(self->temperatureLog, self->logIncrement * sizeof(int));
-    }
-    if (self->humidityLog == NULL)
-    {
-        self->humidityLog = malloc(self->logIncrement * 2 * sizeof(int));
-    }
-    else
-    {
-        self->humidityLog = realloc(self->humidityLog, self->logIncrement * sizeof(int));
-    }
+    // Can simply call realloc from the start since malloc and realloc with a NULL pointer are equivalent
+    self->temperatureLog = realloc(self->temperatureLog, (self->logSize + self->logIncrement) * sizeof(int));
+    self->humidityLog = realloc(self->humidityLog, (self->logSize + self->logIncrement) * sizeof(int));
+
     self->logSize += self->logIncrement;
 }
 
@@ -83,6 +74,12 @@ void TemperatureAndHumidity_update(int humidity, int temperature, TemperatureAnd
 
     // Increment currentLogIndex
     self->logIndex++;
+}
+
+int TemperatureAndHumidity_get_reserved(int message)
+{
+    int reservedStart = 29, reservedEnd = 31;
+    return extract_bits(message, reservedStart, reservedEnd);
 }
 
 int TemperatureAndHumidity_get_type(int message)

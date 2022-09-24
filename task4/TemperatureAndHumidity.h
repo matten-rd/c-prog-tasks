@@ -26,6 +26,8 @@ void TemperatureAndHumidity_update_log_size(TemperatureAndHumidityStore *self);
 
 void TemperatureAndHumidity_update(int humidity, int temperature, TemperatureAndHumidityStore *self);
 
+int TemperatureAndHumidity_get_reserved(int message);
+
 int TemperatureAndHumidity_get_type(int message);
 
 int TemperatureAndHumidity_get_humidity(int message);
