@@ -24,6 +24,14 @@ TemperatureAndHumidityStore TemperatureAndHumidity_init()
     return th;
 }
 
+void TemperatureAndHumidity_free(TemperatureAndHumidityStore *self)
+{
+    if (self->temperatureLog != NULL)
+        free(self->temperatureLog);
+    if (self->humidityLog != NULL)
+        free(self->humidityLog);
+}
+
 int TemperatureAndHumidity_get_log_increment(int message)
 {
     int incrementStart = 0, incrementEnd = 25;
@@ -33,6 +41,7 @@ int TemperatureAndHumidity_get_log_increment(int message)
 void TemperatureAndHumidity_set_log_increment(int newIncrement, TemperatureAndHumidityStore *self)
 {
     self->logIncrement = newIncrement;
+    // Weird Kattis implementation forces us to update log size first time log increment is set
     if (self->logSize == 0)
     {
         TemperatureAndHumidity_update_log_size(self);

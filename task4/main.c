@@ -140,11 +140,7 @@ int main(int argc, char const *argv[])
 
                 case 0b110:
                     printf("Exiting...\n");
-                    // free-ing causes RTE in Kattis
-                    // if (temperatureAndHumidityStore.temperatureLog != NULL)
-                    //     free(temperatureAndHumidityStore.temperatureLog);
-                    // if (temperatureAndHumidityStore.humidityLog != NULL)
-                    //     free(temperatureAndHumidityStore.humidityLog);
+                    TemperatureAndHumidity_free(&temperatureAndHumidityStore);
                     exit(0);
                     break;
 
@@ -162,7 +158,6 @@ int main(int argc, char const *argv[])
                     break;
                 }
             }
-            
         }
     }
     return 0;

@@ -18,6 +18,8 @@ typedef struct TemperatureAndHumidityStore
 
 TemperatureAndHumidityStore TemperatureAndHumidity_init();
 
+void TemperatureAndHumidity_free(TemperatureAndHumidityStore *self);
+
 int TemperatureAndHumidity_get_log_increment(int message);
 
 void TemperatureAndHumidity_set_log_increment(int newIncrement, TemperatureAndHumidityStore *self);
