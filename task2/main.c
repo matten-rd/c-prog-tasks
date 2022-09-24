@@ -138,8 +138,6 @@ int main(int argc, char const *argv[])
 {
     char logInput[32];
 
-    int hexConvertRes;
-
     int message, reserved, type, data;
     int reservedStart = 29, reservedEnd = 31;
     int typeStart = 26, typeEnd = 28;
@@ -165,20 +163,16 @@ int main(int argc, char const *argv[])
             printf("Input Error\n");
         } else
         {
-            hexConvertRes = sscanf(logInput, "%x", &message);
-            if (hexConvertRes != 1)
+            sscanf(logInput, "%x", &message);
+  
+            // Here message is a valid hexnumber
+            reserved = extractBits(message, reservedStart, reservedEnd);
+
+            if (reserved != 0)
             {
-                printf("Huh?\n");
+                printf("Input Error\n");
             } else
             {
-                // Here message is a valid hexnumber
-
-                /**
-                 * NOTE: the intructions for this task suggest that we should print "Input Error" if the reserved bits are non-zero.
-                 * However Kattis does not check this and you will receive a "Wrong Answer" error if youfollow the instructions.
-                 */
-                reserved = extractBits(message, reservedStart, reservedEnd);
-               
                 type = extractBits(message, typeStart, typeEnd);
                 data = extractBits(message, dataStart, dataEnd);
                 handle_valid_input(type, data, &tempStore);
