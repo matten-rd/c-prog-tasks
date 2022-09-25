@@ -26,10 +26,8 @@ TemperatureAndHumidityStore TemperatureAndHumidity_init()
 
 void TemperatureAndHumidity_free(TemperatureAndHumidityStore *self)
 {
-    if (self->temperatureLog != NULL)
-        free(self->temperatureLog);
-    if (self->humidityLog != NULL)
-        free(self->humidityLog);
+    free(self->temperatureLog);
+    free(self->humidityLog);
 }
 
 int TemperatureAndHumidity_get_log_increment(int message)
