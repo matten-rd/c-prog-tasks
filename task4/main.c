@@ -81,6 +81,12 @@ void handle_valid_input(int type, int humidity, int temperature, TemperatureAndH
         }
         break;
 
+    case 0b110:
+        printf("Exiting...\n");
+        TemperatureAndHumidity_free(thStore);
+        exit(0);
+        break;
+
     default:
         printf("Input Error\n");
         break;
@@ -122,9 +128,8 @@ int main(int argc, char const *argv[])
                 // Here message is a valid hexnumber
                 type = TemperatureAndHumidity_get_type(message);
 
-                switch (type)
+                if (type == 0b111) // Handle log increment requests separately since it is used to initialise the program
                 {
-                case 0b111:
                     newIncrement = TemperatureAndHumidity_get_log_increment(message);
                     if (newIncrement <= 0)
                     {
@@ -136,15 +141,8 @@ int main(int argc, char const *argv[])
                         printf("New Log Increment: %d\n", newIncrement);
                         printf("Current Log Size: %d\n", temperatureAndHumidityStore.logSize);
                     }
-                    break;
-
-                case 0b110:
-                    printf("Exiting...\n");
-                    TemperatureAndHumidity_free(&temperatureAndHumidityStore);
-                    exit(0);
-                    break;
-
-                default:
+                } else
+                {
                     if (temperatureAndHumidityStore.logSize == 0)
                     {
                         printf("Log Not Initialized\n");
@@ -155,7 +153,6 @@ int main(int argc, char const *argv[])
                         temperature = TemperatureAndHumidity_get_temperature(message);
                         handle_valid_input(type, humidity, temperature, &temperatureAndHumidityStore);
                     }
-                    break;
                 }
             }
         }
