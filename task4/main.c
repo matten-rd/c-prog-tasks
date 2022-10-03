@@ -125,7 +125,6 @@ int main(int argc, char const *argv[])
                 printf("Input Error\n");
             } else
             {
-                // Here message is a valid hexnumber
                 type = TemperatureAndHumidity_get_type(message);
 
                 if (type == 0b111) // Handle log increment requests separately since it is used to initialise the program
